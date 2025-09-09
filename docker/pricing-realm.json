@@ -1,0 +1,53 @@
+{
+  "realm": "pricing",
+  "enabled": true,
+  "displayName": "Pricing Realm",
+  "users": [
+    {
+      "username": "testuser",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Test",
+      "lastName": "User",
+      "email": "testuser@pricing.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "testpassword"
+        }
+      ],
+      "realmRoles": ["user"]
+    }
+  ],
+  "roles": {
+    "realm": [
+      { "name": "user" },
+      { "name": "admin" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "product-viewer-client",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "product-viewer-secret",
+      "redirectUris": [
+        "http://localhost:8080/login/oauth2/code/keycloak"
+      ],
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:8080/"
+      },
+      "baseUrl": "http://localhost:8080",
+      "adminUrl": "http://localhost:8080",
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "fullScopeAllowed": true,
+      "defaultRoles": ["user"]
+    }
+  ]
+}
+
