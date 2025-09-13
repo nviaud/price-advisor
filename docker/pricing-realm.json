@@ -33,7 +33,8 @@
       "publicClient": false,
       "secret": "product-viewer-secret",
       "redirectUris": [
-        "http://localhost:8080/login/oauth2/code/keycloak"
+        "http://localhost:8080/login/oauth2/code/keycloak",
+        "http://localhost:8080/swagger-ui/oauth2-redirect.html"
       ],
       "attributes": {
         "post.logout.redirect.uris": "http://localhost:8080/"

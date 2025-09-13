@@ -1,19 +1,63 @@
 package com.nviaud.pricing.services
 
+import com.nviaud.pricing.entities.Quotation
+import com.nviaud.pricing.events.Events
+import com.nviaud.pricing.events.v1.QuotationProduct
+import com.nviaud.pricing.events.v1.QuotationSubmitted
+import com.nviaud.pricing.repositories.QuotationRepository
 import org.slf4j.LoggerFactory
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.prompt.Prompt
 import org.springframework.ai.chat.prompt.PromptTemplate
 import org.springframework.ai.converter.BeanOutputConverter
+import org.springframework.cloud.stream.function.StreamBridge
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
+
 @Service
-class QuotationService(private val chatClient: ChatClient)  {
+class QuotationService(
+    private val productService: ProductService,
+    private val quotationRepository: QuotationRepository,
+    private val chatClient: ChatClient,
+    private val streamBridge: StreamBridge,
+)  {
 
     private val logger = LoggerFactory.getLogger(QuotationService::class.java)
 
     private val beanOutputConverter = BeanOutputConverter(QuotationData::class.java)
+
+    fun submitQuotation(content: String): Quotation {
+        val productBrands = productService.getAllProductBrands()
+        val productCategories = productService.getAllProductCategories()
+        val productNames = productService.getAllProductNames()
+        val quotationData = parseDataFromQuotationContent(content, productBrands, productCategories, productNames)
+        // TODO find a way to track unique quotation ID (hash of content ?)
+        val quotation = Quotation()
+        val quotationSaved = quotationRepository.save(quotation)
+        val quotationEvent = entityToEvent(quotationSaved, quotationData)
+        publishQuotationSubmittedEvent(quotationEvent)
+        return quotationSaved
+    }
+
+    private fun entityToEvent(quotation: Quotation, quotationData: QuotationData): QuotationSubmitted {
+        return QuotationSubmitted(
+            quotationId = quotation.id.toString(),
+            products =
+                quotationData.products.map {
+                    val product = productService.findProductByName(it.productName)
+                        ?: throw NoSuchElementException("Product with name ${it.productName} not found")
+                    QuotationProduct(
+                        productId = product.id.toString(),
+                        price = it.unitPrice
+                    )
+                }
+        )
+    }
+
+    private fun publishQuotationSubmittedEvent(event: QuotationSubmitted) {
+        streamBridge.send(Events.QUOTATION_SUBMITTED_V1, event)
+    }
 
     fun parseDataFromQuotationContent(content: String, productBrands: List<String>, productCategories: List<String>, productNames: List<String>): QuotationData {
         val userInputTemplate = """
@@ -83,11 +127,11 @@ class QuotationService(private val chatClient: ChatClient)  {
 }
 
 data class QuotationData(
-   val products: List<QuotationProduct>,
+   val products: List<QuotationDataProduct>,
    val quotationDate: String,
 )
 
-data class QuotationProduct (
+data class QuotationDataProduct (
     val productBrand: String,
     val productName: String,
     val productCategory: String,

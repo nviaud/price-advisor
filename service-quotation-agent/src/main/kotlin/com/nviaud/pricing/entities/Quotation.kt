@@ -20,14 +20,4 @@ class Quotation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
 
-    @ManyToOne
-    var product: Product? = null
-
-    var quantity: Int? = null
-    var unitPrice: BigDecimal? = null
-    var totalPrice: BigDecimal? = null
-    var vat: BigDecimal? = null
-    var date: OffsetDateTime? = null
-
-    constructor()
 }

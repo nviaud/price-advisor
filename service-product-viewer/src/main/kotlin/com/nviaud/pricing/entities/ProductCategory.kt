@@ -9,6 +9,6 @@ import jakarta.persistence.Id
 class ProductCategory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private var id: Long? = null
-    private var name: String? = null
+    val id: Long? = null
+    val name: String? = null
 }

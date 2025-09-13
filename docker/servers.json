@@ -1,0 +1,32 @@
+{
+  "Servers": {
+    "Product Analytics": {
+      "Name": "Product Analytics",
+      "Group": "Postgres",
+      "Host": "postgres-product-analytics",
+      "Port": 5432,
+      "Username": "postgres",
+      "SSLMode": "prefer",
+      "MaintenanceDB": "product_analytics",
+      "PassFile": "/var/lib/pgadmin/pgpass"
+    },
+    "Product Viewer": {
+      "Name": "Product Viewer",
+      "Group": "Postgres",
+      "Host": "postgres-product-viewer",
+      "Port": 5432,
+      "Username": "postgres",
+      "SSLMode": "prefer",
+      "MaintenanceDB": "product_viewer"
+    },
+    "Quotation Agent": {
+      "Name": "Quotation Agent",
+      "Group": "Postgres",
+      "Host": "postgres-quotation-agent",
+      "Port": 5432,
+      "Username": "postgres",
+      "SSLMode": "prefer",
+      "MaintenanceDB": "quotation_agent"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+package com.nviaud.pricing.events.v1
+
+data class ProductCreated(
+    val productId: String,
+
+    val name: String,
+    val category: String,
+    val brand: String,
+)

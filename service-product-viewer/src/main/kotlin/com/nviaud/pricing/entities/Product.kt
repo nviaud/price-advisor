@@ -33,12 +33,6 @@ class Product {
     var depth: Int? = null
     var weight: Int? = null
 
-    var averagePrice: BigDecimal? = null
-    var minPrice: BigDecimal? = null
-    var maxPrice: BigDecimal? = null
-    var variance: BigDecimal? = null
-    var numberOfQuotations: Int? = null
-
     @ManyToOne
     var category: ProductCategory? = null
 

@@ -1,16 +1,34 @@
-version: '3.8'
 services:
-  postgres:
+  postgres-product-analytics:
     image: postgres:15
-    restart: always
     environment:
-      POSTGRES_DB: pricing
-      POSTGRES_USER: dbuser
-      POSTGRES_PASSWORD: dbpassword
+      POSTGRES_DB: product_analytics
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_product_analytics:/var/lib/postgresql/data
+  postgres-product-viewer:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: product_viewer
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data_product_viewer:/var/lib/postgresql/data
+  postgres-quotation-agent:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: quotation_agent
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data_quotation_agent:/var/lib/postgresql/data
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: always
@@ -20,9 +38,12 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - postgres
+      - postgres-product-analytics
+      - postgres-product-viewer
+      - postgres-quotation-agent
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+      - ./docker/servers.json:/pgadmin4/servers.json
   ollama:
     image: ollama/ollama
     ports:
@@ -45,7 +66,66 @@ services:
       - "81:8080"
     volumes:
       - ./docker/pricing-realm.json:/opt/keycloak/data/import/pricing-realm.json:ro
+      - keycloak_data:/opt/keycloak/data
+#  zookeeper:
+#    image: zookeeper:latest
+#    ports:
+#      - "2181:2181"
+#    volumes:
+#      - zookeeper_data:/var/lib/zookeeper/data
+#      - zookeeper_log:/var/lib/zookeeper/log
+#  kafka:
+#    image: apache/kafka:latest
+#    depends_on:
+#      - zookeeper
+#    ports:
+#      - "9092:9092"
+#      - "9093:9093"
+#    environment:
+#      KAFKA_NODE_ID: 1
+#      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#      KAFKA_PROCESS_ROLES: broker,controller
+#      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://localhost:9093
+#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+#      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+#      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+#      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+#      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+#      KAFKA_NUM_PARTITIONS: 3
+#    volumes:
+#      - kafka_data:/var/lib/kafka/data
+#      - kafka_log:/var/lib/kafka/log
+#  kafka-ui:
+#    image: provectuslabs/kafka-ui:latest
+#    ports:
+#      - "82:8080"
+#    environment:
+#      KAFKA_CLUSTERS_0_NAME: local
+#      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+#    depends_on:
+#      - kafka
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"   # AMQP protocol
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
 volumes:
-  postgres_data:
+  postgres_data_product_analytics:
+  postgres_data_product_viewer:
+  postgres_data_quotation_agent:
   pgadmin_data:
   redis_data:
+#  zookeeper_data:
+#  zookeeper_log:
+#  kafka_data:
+#  kafka_log:
+  rabbitmq_data:
+  keycloak_data:
