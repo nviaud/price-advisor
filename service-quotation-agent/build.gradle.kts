@@ -62,6 +62,46 @@ kotlin {
     }
 }
 
+
 tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
+// Integration tests configuration
+
+configurations {
+    val testIntegrationImplementation by creating {
+        extendsFrom(configurations.testImplementation.get())
+        // Declaration only, not resolvable
+    }
+    val testIntegrationRuntimeOnly by creating {
+        extendsFrom(configurations.testRuntimeOnly.get())
+        // Declaration only, not resolvable
+    }
+    val testIntegrationCompileClasspath by creating {
+        extendsFrom(testIntegrationImplementation)
+        isCanBeResolved = true
+        isCanBeConsumed = false
+    }
+    val testIntegrationRuntimeClasspath by creating {
+        extendsFrom(testIntegrationRuntimeOnly)
+        isCanBeResolved = true
+        isCanBeConsumed = false
+    }
+}
+
+sourceSets {
+    val testIntegration by creating {
+        kotlin.srcDir("src/test-integration/kotlin")
+        resources.srcDir("src/test-integration/resources")
+        compileClasspath += sourceSets["main"].output + configurations["testIntegrationCompileClasspath"]
+        runtimeClasspath += output + compileClasspath + sourceSets["main"].runtimeClasspath + configurations["testIntegrationRuntimeClasspath"]
+    }
+}
+
+tasks.register<Test>("testIntegration") {
+    testClassesDirs = sourceSets["testIntegration"].output.classesDirs
+    classpath = sourceSets["testIntegration"].runtimeClasspath
+    shouldRunAfter(tasks.test)
     useJUnitPlatform()
 }

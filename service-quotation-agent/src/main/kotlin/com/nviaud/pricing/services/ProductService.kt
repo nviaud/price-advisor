@@ -38,9 +38,9 @@ class ProductService(private val productRepository: ProductRepository) {
             productRepository.findById(productId)
                 .ifPresentOrElse(
                     { product ->
-                        message.name?.let { product.name = it }
-                        message.brand?.let { product.brand = it }
-                        message.category?.let { product.category = it }
+                        message.name.let { product.name = it }
+                        message.brand.let { product.brand = it }
+                        message.category.let { product.category = it }
                         productRepository.save(product)
                     },
                     {
