@@ -1,4 +1,4 @@
 postgres-product-analytics:5432:product_analytics:postgres:postgres
-postgres-product-viewer:5432:product_viewer:postgres:postgres
+postgres-product-admin:5432:product_viewer:postgres:postgres
 postgres-quotation-agent:5432:quotation_agent:postgres:postgres
 

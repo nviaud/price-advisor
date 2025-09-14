@@ -13,7 +13,7 @@
     "Product Viewer": {
       "Name": "Product Viewer",
       "Group": "Postgres",
-      "Host": "postgres-product-viewer",
+      "Host": "postgres-product-admin",
       "Port": 5432,
       "Username": "postgres",
       "SSLMode": "prefer",

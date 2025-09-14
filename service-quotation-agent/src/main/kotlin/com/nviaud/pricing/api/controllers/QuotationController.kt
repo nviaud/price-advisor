@@ -1,7 +1,7 @@
 package com.nviaud.pricing.api.controllers
 
-import com.nviaud.pricing.api.models.QuotationRequest
-import com.nviaud.pricing.api.models.QuotationResponse
+import com.nviaud.pricing.api.resources.QuotationRequest
+import com.nviaud.pricing.api.resources.QuotationResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PostMapping

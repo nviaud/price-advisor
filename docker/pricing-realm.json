@@ -27,11 +27,11 @@
   },
   "clients": [
     {
-      "clientId": "product-viewer-client",
+      "clientId": "product-admin-client",
       "enabled": true,
       "protocol": "openid-connect",
       "publicClient": false,
-      "secret": "product-viewer-secret",
+      "secret": "product-admin-secret",
       "redirectUris": [
         "http://localhost:8080/login/oauth2/code/keycloak",
         "http://localhost:8080/swagger-ui/oauth2-redirect.html"

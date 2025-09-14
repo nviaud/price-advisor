@@ -1,4 +1,14 @@
 services:
+  postgres-product-admin:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: product_viewer
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data_product_viewer:/var/lib/postgresql/data
   postgres-product-analytics:
     image: postgres:15
     environment:
@@ -6,19 +16,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data_product_analytics:/var/lib/postgresql/data
-  postgres-product-viewer:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: product_viewer
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
       - "5434:5432"
     volumes:
-      - postgres_data_product_viewer:/var/lib/postgresql/data
+      - postgres_data_product_analytics:/var/lib/postgresql/data
   postgres-quotation-agent:
     image: postgres:15
     environment:
@@ -39,7 +39,7 @@ services:
       - "80:80"
     depends_on:
       - postgres-product-analytics
-      - postgres-product-viewer
+      - postgres-product-admin
       - postgres-quotation-agent
     volumes:
       - pgadmin_data:/var/lib/pgadmin

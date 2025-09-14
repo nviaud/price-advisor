@@ -1,7 +1,7 @@
 package com.nviaud.pricing.api.assemblers
 
-import com.nviaud.pricing.api.models.PaginatedQuotationResponse
-import com.nviaud.pricing.api.models.QuotationResponse
+import com.nviaud.pricing.api.resources.PaginatedQuotationResponse
+import com.nviaud.pricing.api.resources.QuotationResponse
 import com.nviaud.pricing.entities.Quotation
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
