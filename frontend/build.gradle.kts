@@ -9,3 +9,7 @@ node {
     npmVersion = "11.6.0"
     download = true
 }
+
+tasks.register<com.github.gradle.node.npm.task.NpmTask>("run") {
+    args.set(listOf("run", "dev"))
+}
