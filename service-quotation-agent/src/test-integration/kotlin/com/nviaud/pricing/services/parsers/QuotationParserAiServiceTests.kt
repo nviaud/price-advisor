@@ -1,37 +1,40 @@
-package com.nviaud.pricing.services
+package com.nviaud.pricing.services.parsers
 
-import com.nviaud.pricing.repositories.QuotationRepository
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-import org.springframework.ai.chat.client.ChatClient
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cloud.stream.function.StreamBridge
-import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.core.io.Resource
+import org.springframework.util.MimeType
 import java.math.BigDecimal
 
+//@ExtendWith( MilvusTestExtension::class)
 @SpringBootTest
-class QuotationServiceTests {
-
-    @MockitoBean
-    lateinit var productService: ProductService
-
-    @MockitoBean
-    lateinit var quotationRepository: QuotationRepository
-
-    @MockitoBean
-    lateinit var chatClient: ChatClient
-
-    @MockitoBean
-    lateinit var streamBridge: StreamBridge
+class QuotationParserAiServiceTests {
 
     @Autowired
-    lateinit var quotationService: QuotationService
+    lateinit var quotationParserService: QuotationParserAiService
+
+    @Autowired
+    lateinit var vectorStore: VectorStore
+
+    @Value("classpath:quotation.pdf")
+    lateinit var quotationResource: Resource
 
     @Test
-    fun `convert JSON response to quotation data`() {
-        val response = this::class.java.getResource("/response1.json")!!.readText()
-        val quotationData = quotationService.convertToQuotationData(response)
+    fun `should create Quotation from file`() {
+
+//        vectorStore.add(
+//            listOf(
+//                Document("phenix fenêtre pvc double vantaux 1250x1250",  mapOf("id" to "1")),
+//                Document( "franciaflex volet roulant 1500x1350",  mapOf("id" to "2")),
+//            )
+//        )
+
+        val quotationData = quotationParserService.parseDataFromQuotation(MimeType.valueOf("application/pdf"), quotationResource)
+
         Assertions.assertThat(quotationData.quotationDate).isEqualTo("2025-09-01")
         Assertions.assertThat(quotationData.products).hasSize(2)
 
@@ -61,4 +64,5 @@ class QuotationServiceTests {
         Assertions.assertThat(product2.totalPrice.compareTo(BigDecimal("918.96"))).isEqualTo(0)
         Assertions.assertThat(product2.vat?.compareTo(BigDecimal("5.5"))).isEqualTo(0)
     }
+
 }

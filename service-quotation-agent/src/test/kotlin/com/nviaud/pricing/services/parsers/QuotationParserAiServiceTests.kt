@@ -1,32 +1,29 @@
-package com.nviaud.pricing.services
+package com.nviaud.pricing.services.parsers
 
+import com.nviaud.pricing.repositories.QuotationRepository
+import com.nviaud.pricing.services.ProductService
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import org.springframework.ai.chat.client.ChatClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.cloud.stream.function.StreamBridge
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.math.BigDecimal
 
 @SpringBootTest
-class QuotationServiceTests {
+class QuotationParserAiServiceTests {
+
+    @MockitoBean
+    lateinit var chatClient: ChatClient
 
     @Autowired
-    lateinit var quotationService: QuotationService
+    lateinit var quotationParserService: QuotationParserAiService
 
     @Test
-    fun `should create Quotation from content and link to Product`() {
-        val content = this::class.java.getResource("/quotation1.txt")!!.readText()
-        val productCategories = listOf("fenêtre", "porte", "volet", "portail", "garage")
-        val productBrands = listOf("lapeyre", "phenix", "tryba", "alu", "bois", "pvc", "franciaflex", "mixte")
-        val productNames = listOf(
-            "fenêtre bois simple vantaux",
-            "fenêtre pvc double vantaux",
-            "porte entrée",
-            "volet roulant",
-            "portail aluminium",
-            "porte garage basculante"
-        )
-        val quotationData = quotationService.parseDataFromQuotationContent(content, productBrands, productCategories, productNames)
-
+    fun `convert JSON response to quotation data`() {
+        val response = this::class.java.getResource("/response1.json")!!.readText()
+        val quotationData = quotationParserService.convertToQuotationData(response)
         Assertions.assertThat(quotationData.quotationDate).isEqualTo("2025-09-01")
         Assertions.assertThat(quotationData.products).hasSize(2)
 

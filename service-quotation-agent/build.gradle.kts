@@ -30,14 +30,26 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.postgresql:postgresql:42.7.3")
     implementation("org.springframework.ai:spring-ai-starter-model-ollama")
-    implementation ("org.springframework.boot:spring-boot-starter-cache")
+    implementation("org.springframework.ai:spring-ai-advisors-vector-store")
+    implementation("org.springframework.ai:spring-ai-starter-vector-store-milvus")
+//    implementation("org.springframework.boot:spring-boot-starter-cache")
+//    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
+//    implementation("org.springframework.boot:spring-boot-starter-security")
+//    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+//    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.cloud:spring-cloud-stream")
     implementation("org.springframework.amqp:spring-rabbit-stream")
     implementation("org.springframework.cloud:spring-cloud-stream-binder-rabbit")
 //    implementation("org.apache.kafka:kafka-streams")
 //    implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka-streams")
 //    implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka")
+    implementation("org.apache.pdfbox:pdfbox:2.0.30")
+    implementation("org.apache.pdfbox:pdfbox-tools:2.0.30")
+    implementation("technology.tabula:tabula:1.0.4") {
+        exclude(group = "org.slf4j", module = "slf4j-simple")
+    }
+    implementation("net.sourceforge.tess4j:tess4j:5.11.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -53,6 +65,7 @@ dependencyManagement {
     imports {
         mavenBom("org.springframework.ai:spring-ai-bom:${property("springAiVersion")}")
         mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+        //mavenBom("io.milvus:milvus-sdk-java-bom:2.4.4")
     }
 }
 
@@ -104,4 +117,21 @@ tasks.register<Test>("testIntegration") {
     classpath = sourceSets["testIntegration"].runtimeClasspath
     shouldRunAfter(tasks.test)
     useJUnitPlatform()
+}
+
+tasks.register<Exec>("dockerComposeUp") {
+    group = "docker"
+    description = "Start Docker Compose services"
+    commandLine("docker-compose", "up")
+}
+
+tasks.register<Exec>("dockerComposeDown") {
+    group = "docker"
+    description = "Stop Docker Compose services"
+    commandLine("docker-compose", "down")
+}
+
+tasks.named<Test>("test") {
+    dependsOn("dockerComposeUp")
+    finalizedBy("dockerComposeDown")
 }
