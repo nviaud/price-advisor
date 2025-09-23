@@ -1,7 +1,11 @@
 package com.nviaud.pricing.services.parsers
 
+import com.nviaud.pricing.extensions.MilvusTestExtension
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.ai.document.Document
+import org.springframework.ai.vectorstore.SearchRequest
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -10,7 +14,8 @@ import org.springframework.core.io.Resource
 import org.springframework.util.MimeType
 import java.math.BigDecimal
 
-//@ExtendWith( MilvusTestExtension::class)
+
+@ExtendWith(MilvusTestExtension::class)
 @SpringBootTest
 class QuotationParserAiServiceTests {
 
@@ -26,12 +31,15 @@ class QuotationParserAiServiceTests {
     @Test
     fun `should create Quotation from file`() {
 
-//        vectorStore.add(
-//            listOf(
-//                Document("phenix fenêtre pvc double vantaux 1250x1250",  mapOf("id" to "1")),
-//                Document( "franciaflex volet roulant 1500x1350",  mapOf("id" to "2")),
-//            )
-//        )
+        vectorStore.add(
+            listOf(
+                Document("phenix fenêtre pvc double vantaux 1250x1250 for Spring",  mapOf("id" to "1")),
+                Document("franciaflex volet roulant 1500x1350",  mapOf("id" to "2")),
+                Document("spring is really a good framework",  mapOf("id" to "3", "author" to "john", "article_type" to "blog")),
+                Document("I love spring framework",  mapOf("id" to "4", "author" to "jill", "article_type" to "blog")),
+                Document("spring boot makes it easy to create stand-alone applications",  mapOf("id" to "5", "author" to "jack", "article_type" to "news")),
+            )
+        )
 
         val quotationData = quotationParserService.parseDataFromQuotation(MimeType.valueOf("application/pdf"), quotationResource)
 

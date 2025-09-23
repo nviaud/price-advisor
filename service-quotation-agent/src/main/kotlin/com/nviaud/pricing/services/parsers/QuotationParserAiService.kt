@@ -1,5 +1,6 @@
 package com.nviaud.pricing.services.parsers
 
+import com.nviaud.pricing.services.parsers.tools.ProductNameExtractorTool
 import net.sourceforge.tess4j.Tesseract
 import net.sourceforge.tess4j.TesseractException
 import org.apache.pdfbox.pdmodel.PDDocument
@@ -10,6 +11,7 @@ import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvi
 import org.springframework.ai.chat.prompt.Prompt
 import org.springframework.ai.chat.prompt.PromptTemplate
 import org.springframework.ai.converter.BeanOutputConverter
+import org.springframework.ai.vectorstore.SearchRequest
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -60,7 +62,14 @@ class QuotationParserAiService(
         }
 
         val userInputTemplate = """
-        You are an expert quotation parser. Your task is to extract structured data from the quotation given later.
+        You are an expert quotation parser.
+        
+        Your task are:
+        1. If the quotation is not in english, translate it to english.
+        2. Extract products name from the quotation. Use the tool {productNameExtractorTool} to help you.
+        3. For each product, return data following the JSON format specified below.
+        
+        Your task is to extract structured data from the quotation given later.
         Multiple products can be present in the quotation.
         
         If the quotation in not english, translate it to english before extracting the data.
@@ -98,6 +107,7 @@ class QuotationParserAiService(
         val promptTemplate = PromptTemplate.builder().template(userInputTemplate).variables(
             mapOf(
                 "format" to beanOutputConverter.format,
+                "productNameExtractorTool" to ProductNameExtractorTool.PRODUCT_NAME_EXTRACTOR_TOOL,
                 "quotation" to quotation
             )
         ).build()
@@ -112,8 +122,22 @@ class QuotationParserAiService(
 
         val message = promptTemplate.createMessage()
         val prompt = Prompt(message)
-        val advisor = QuestionAnswerAdvisor(vectorStore)
-        val request = chatClient.prompt(prompt).advisors(advisor)
+        val searchRequest = SearchRequest.builder()
+            .query("product details")
+            .topK(5)
+            //.similarityThreshold(0.5)
+            //.filterExpression("productCategory == windows AND productBrand == phenix")
+            .build()
+
+        // Use the correct constructor for QuestionAnswerAdvisor
+        val advisor = QuestionAnswerAdvisor
+            .builder(vectorStore)
+            .searchRequest(searchRequest)
+            .build()
+        val request = chatClient
+            .prompt(prompt)
+            .toolNames(ProductNameExtractorTool.PRODUCT_NAME_EXTRACTOR_TOOL)
+            //.advisors(advisor)
 
         logger.trace("Sending prompt to ChatClient: {}", message)
 
