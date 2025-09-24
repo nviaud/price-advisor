@@ -36,14 +36,14 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - "80:80"
+      - "5430:80"
     depends_on:
       - postgres-product-analytics
       - postgres-product-admin
       - postgres-quotation-agent
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-      - ./docker/servers.json:/pgadmin4/servers.json
+      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json
   ollama:
     image: ollama/ollama
     ports:
@@ -63,19 +63,22 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
     command: ["start-dev", "--import-realm"]
     ports:
-      - "81:8080"
+      - "8081:8080"
     volumes:
-      - ./docker/pricing-realm.json:/opt/keycloak/data/import/pricing-realm.json:ro
+      - ./docker/keycloak/pricing-realm.json:/opt/keycloak/data/import/pricing-realm.json:ro
       - keycloak_data:/opt/keycloak/data
   envoy:
-    image: envoyproxy/envoy:v1.29-latest
+    image: envoyproxy/envoy:v1.33-latest
     restart: always
     container_name: envoy
     ports:
       - "8080:8080"   # Public HTTP/gRPC/WebSocket/GraphQL
       - "9901:9901"   # Envoy admin
     volumes:
-      - ./docker/envoy.yaml:/etc/envoy/envoy.yaml
+      - envoy_data:/tmp
+      - ./docker/envoy/envoy.yaml:/etc/envoy/envoy.yaml
+      - ./docker/envoy/token-secret.yaml:/etc/envoy/token-secret.yaml:ro
+      - ./docker/envoy/hmac.yaml:/etc/envoy/hmac.yaml:ro
     depends_on:
       - postgres-product-admin
       - postgres-product-analytics
@@ -203,3 +206,4 @@ volumes:
   minio_data:
   etcd_data:
   milvus_data:
+  envoy_data:

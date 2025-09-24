@@ -12,20 +12,15 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 @Suppress("unused")
-class SwaggerConfig(private val oauth2ClientConfig :OAuth2ClientProperties) {
+class SwaggerConfig() {
 
     @Bean
     fun customOpenAPI(): OpenAPI {
 
-        val clientName = "keycloak"
-
         val securityScheme = SecurityScheme()
             .type(SecurityScheme.Type.OPENIDCONNECT)
             .openIdConnectUrl(
-                oauth2ClientConfig
-                    .provider[clientName]
-                    !!.issuerUri
-                    .plus("/.well-known/openid-configuration")
+                "http://localhost:8081/realms/pricing/.well-known/openid-configuration"
             )
 
         return OpenAPI()

@@ -27,11 +27,11 @@
   },
   "clients": [
     {
-      "clientId": "bff-gateway-client",
+      "clientId": "envoy-client",
       "enabled": true,
       "protocol": "openid-connect",
       "publicClient": false,
-      "secret": "bff-gateway-secret",
+      "secret": "envoy-secret",
       "redirectUris": [
         "http://localhost:8080/login/oauth2/code/keycloak",
         "http://localhost:8080/swagger-ui/oauth2-redirect.html"

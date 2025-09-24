@@ -1,6 +1,7 @@
-package com.nviaud.pricing.config
+package com.priceadvisor.bff.config
 
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
@@ -8,13 +9,11 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
 
 /**
- * NOT IN USE: Example of stateful authentication configuration with session management and OIDC logout handling.
- * The application currently uses stateless authentication with JWT tokens.
+ * Security configuration for stateful authentication using OAuth2 / OIDC.
  */
-
-// @Configuration
+@Configuration
 @Suppress("unused")
-class SecurityStatefulAuthConfig(private val clientRegistrationRepository: ClientRegistrationRepository) {
+class SecurityConfig(private val clientRegistrationRepository: ClientRegistrationRepository) {
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {

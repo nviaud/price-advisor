@@ -7,10 +7,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 
-
+/**
+ * Security configuration for stateless authentication using JWT tokens.
+ */
 @Configuration
 @Suppress("unused")
-class SecurityStatelessAuthConfig() {
+class SecurityConfig() {
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
