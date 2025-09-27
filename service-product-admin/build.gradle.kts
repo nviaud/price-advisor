@@ -29,15 +29,13 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
     implementation("org.postgresql:postgresql:42.7.3")
-//    implementation("org.springframework.boot:spring-boot-starter-data-redis")
-//    implementation("org.springframework.session:spring-session-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.cloud:spring-cloud-stream")
     implementation("org.springframework.amqp:spring-rabbit-stream")
     implementation("org.springframework.cloud:spring-cloud-stream-binder-rabbit")
-    implementation("org.springframework.boot:spring-boot-starter-data-rest")
+//    implementation("org.springframework.boot:spring-boot-starter-data-rest")
 //    implementation("org.apache.kafka:kafka-streams")
 //    implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka")
 //    implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka-streams")
@@ -50,6 +48,8 @@ dependencies {
     testImplementation("com.h2database:h2")
     testImplementation("org.mockito:mockito-core:5.2.0")
     testImplementation("org.mockito:mockito-inline:5.2.0")
+    testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
 }
 
 dependencyManagement {

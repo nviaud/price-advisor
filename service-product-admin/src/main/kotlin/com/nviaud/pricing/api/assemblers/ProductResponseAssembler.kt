@@ -1,10 +1,8 @@
 package com.nviaud.pricing.api.assemblers
 
-import com.nviaud.pricing.api.resources.ProductCategoryResponse
 import com.nviaud.pricing.api.resources.PaginatedProductResponse
 import com.nviaud.pricing.api.resources.ProductResponse
 import com.nviaud.pricing.entities.Product
-import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 
 /**
@@ -12,33 +10,33 @@ import org.springframework.stereotype.Service
  * Fetches associated category data.
  */
 @Service
-class ProductResponseAssembler {
+class ProductResponseAssembler(
+    private val categoryResponseAssembler: CategoryResponseAssembler
+): ResponseAssembler<Product, ProductResponse, PaginatedProductResponse>() {
 
-    fun toResponse(product: Product): ProductResponse = ProductResponse(
-        id = product.id,
-        name = product.name,
-        brand = product.brand,
-        height = product.height,
-        width = product.width,
-        depth = product.depth,
-        weight = product.weight,
-        category = product.category !!.let {
-            ProductCategoryResponse(
-                id = it.id,
-                name = it.name
-            )
-        }
+    override fun toResponse(t: Product) = ProductResponse(
+        id = t.id!!,
+        name = t.name,
+        brand = t.brand,
+        height = t.height,
+        width = t.width,
+        depth = t.depth,
+        weight = t.weight,
+        category = t.category?.let { categoryResponseAssembler.toResponse(it) }
     )
 
-    fun toResponseList(products: List<Product>): List<ProductResponse> =
-        products.map { toResponse(it) }
+    override fun instantiatePaginatedResponse(
+        content: List<ProductResponse>,
+        number: Int,
+        size: Int,
+        totalElements: Long,
+        totalPages: Int
+    ) = PaginatedProductResponse(
+        content = content,
+        page = number,
+        size = size,
+        totalElements = totalElements,
+        totalPages = totalPages
+    )
 
-    fun toResponsePage(products: Page<Product>) =
-        PaginatedProductResponse(
-            content = toResponseList(products.content),
-            page = products.number,
-            size = products.size,
-            totalElements = products.totalElements,
-            totalPages = products.totalPages
-        )
 }

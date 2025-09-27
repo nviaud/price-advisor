@@ -22,6 +22,8 @@ import com.nviaud.pricing.services.dto.CreateProduct
 import com.nviaud.pricing.services.dto.UpdateProduct
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.PatchMapping
+import com.nviaud.pricing.api.annotations.PublicEndpoint
+import org.springframework.http.MediaType
 
 
 @RestController
@@ -32,7 +34,8 @@ class ProductController (
     private val productResponseAssembler: ProductResponseAssembler
 ) {
     // Get all products with pagination
-    @GetMapping()
+    @PublicEndpoint
+    @GetMapping
     fun getAllProductsWithPagination(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "10") size: Int
@@ -44,6 +47,7 @@ class ProductController (
     }
 
     // Get a product by ID
+    @PublicEndpoint
     @GetMapping("/{id}")
     fun getProductById(@PathVariable id: Long): ResponseEntity<ProductResponse> {
         val product = productService.findById(id)

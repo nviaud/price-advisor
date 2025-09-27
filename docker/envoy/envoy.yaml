@@ -59,6 +59,14 @@ static_resources:
                       domains: [ "*" ]
                       routes:
                         - match:
+                            prefix: "/"
+                          route:
+                            cluster: service_frontend
+                            timeout: 5s
+                          typed_per_filter_config:
+                            envoy.filters.http.oauth2:
+                              disabled: true
+                        - match:
                             prefix: "/api/v1/products/"
                           route:
                             cluster: service_product_admin
@@ -87,6 +95,19 @@ static_resources:
                     socket_address:
                       address: keycloak
                       port_value: 8080
+    - name: service_frontend
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      connect_timeout: 1s
+      load_assignment:
+        cluster_name: service_frontend
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: host.docker.internal
+                      port_value: 3000
     - name: service_product_admin
       type: STRICT_DNS
       lb_policy: ROUND_ROBIN

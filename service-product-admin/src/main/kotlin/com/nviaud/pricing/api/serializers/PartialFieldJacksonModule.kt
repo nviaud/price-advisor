@@ -1,7 +1,7 @@
 package com.nviaud.pricing.api.serializers
 
 import com.fasterxml.jackson.databind.module.SimpleModule
-import com.nviaud.pricing.services.PartialField
+import com.nviaud.pricing.services.dto.PartialField
 
 class PartialFieldJacksonModule : SimpleModule() {
     init {

@@ -1,9 +1,9 @@
 package com.nviaud.pricing.api.resources
 
-class PaginatedProductResponse(
-    override val content: List<ProductResponse>,
+class PaginatedCategoryResponse (
+    override val content: List<CategoryResponse>,
     override val page: Int,
     override val size: Int,
     override val totalElements: Long,
     override val totalPages: Int
-) : PaginatedResponse<ProductResponse>
+) : PaginatedResponse<CategoryResponse>

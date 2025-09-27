@@ -1,6 +1,7 @@
 package com.nviaud.pricing.api.resources
 
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 
 class ProductRequest(
@@ -13,12 +14,10 @@ class ProductRequest(
     @field:Size(max = 255)
     val brand: String,
 
-    @field:NotBlank
-    @field:Size(max = 255)
     val category: Long,
 
     val height: Int? = null,
     val width: Int? = null,
     val depth: Int? = null,
     val weight: Int? = null,
-)
+) : Request

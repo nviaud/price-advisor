@@ -33,7 +33,7 @@ class Product {
     var brand: String? = null
 
     @ManyToOne(optional = false)
-    var category: ProductCategory? = null
+    var category: Category? = null
 
     var height: Int? = null
     var width: Int? = null

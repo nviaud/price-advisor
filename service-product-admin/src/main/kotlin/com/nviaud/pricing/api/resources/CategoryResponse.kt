@@ -1,6 +1,6 @@
 package com.nviaud.pricing.api.resources
 
-class ProductCategoryResponse (
-    var id: Long? = null,
+class CategoryResponse (
+    override var id: Long,
     var name: String? = null
-)
+) : ResponseElement

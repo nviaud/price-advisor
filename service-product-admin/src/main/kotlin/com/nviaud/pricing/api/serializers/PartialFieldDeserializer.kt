@@ -3,7 +3,7 @@ package com.nviaud.pricing.api.serializers
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import com.nviaud.pricing.services.PartialField
+import com.nviaud.pricing.services.dto.PartialField
 
 class PartialFieldDeserializer : JsonDeserializer<PartialField<Any>>() {
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): PartialField<Any> {

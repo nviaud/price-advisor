@@ -1,13 +1,10 @@
 package com.nviaud.pricing.services.parsers
 
-import com.nviaud.pricing.repositories.QuotationRepository
-import com.nviaud.pricing.services.ProductService
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.cloud.stream.function.StreamBridge
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.math.BigDecimal
 

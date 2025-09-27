@@ -1,5 +1,7 @@
 package com.nviaud.pricing.config
 
+import com.nviaud.pricing.api.annotations.PublicEndpointRequestMatcher
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.Customizer
@@ -12,15 +14,19 @@ import org.springframework.security.web.SecurityFilterChain
  */
 @Configuration
 @Suppress("unused")
-class SecurityConfig() {
+class SecurityConfig @Autowired constructor(
+    private val publicEndpointRequestMatcher: PublicEndpointRequestMatcher
+) {
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        val publicPatterns = publicEndpointRequestMatcher.getPublicPatterns().toTypedArray()
         http
             .authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers("/", "/static/**", "/templates/**", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                    .anyRequest().authenticated()
+                    .requestMatchers(*publicPatterns).permitAll()
+                    .anyRequest().hasRole("ADMIN")
             }
             .oauth2ResourceServer { it.jwt(Customizer.withDefaults()) }  // JWT only, stateless
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) } // Stateless session management

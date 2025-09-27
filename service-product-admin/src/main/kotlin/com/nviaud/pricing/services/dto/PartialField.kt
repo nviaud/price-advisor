@@ -1,4 +1,4 @@
-package com.nviaud.pricing.services
+package com.nviaud.pricing.services.dto
 
 class PartialField<T>(
     val value: T?,

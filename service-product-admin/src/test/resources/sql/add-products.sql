@@ -1,0 +1,5 @@
+INSERT INTO CATEGORY(id, name, version) VALUES (1, 'Category', 0);
+INSERT INTO PRODUCT(id, name, brand, version, category_id) VALUES (1, 'Product', 'Brand', 0, 1);
+
+ALTER TABLE CATEGORY ALTER COLUMN id RESTART WITH 2;
+ALTER TABLE PRODUCT ALTER COLUMN id RESTART WITH 2;
