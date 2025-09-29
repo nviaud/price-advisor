@@ -1,6 +1,7 @@
 package com.nviaud.pricing.services
 
 import com.nviaud.pricing.entities.Product
+import com.nviaud.pricing.entities.Specifications
 import com.nviaud.pricing.events.Events
 import com.nviaud.pricing.events.v1.ProductCreated
 import com.nviaud.pricing.events.v1.ProductUpdated
@@ -38,10 +39,7 @@ class ProductService(
         val product = Product().apply {
             name = dto.name
             brand = dto.brand
-            height = dto.height
-            width = dto.width
-            depth = dto.depth
-            weight = dto.weight
+            specifications = dto.specifications
             category = findCategoryById(dto.category)
         }
         val savedProduct = productRepository.save(product)
@@ -55,10 +53,7 @@ class ProductService(
         product.apply {
             name = dto.name
             brand = dto.brand
-            height = dto.height
-            width = dto.width
-            depth = dto.depth
-            weight = dto.weight
+            specifications = dto.specifications
             category = findCategoryById(dto.category)
         }
         val savedProduct = productRepository.save(product)
@@ -73,10 +68,7 @@ class ProductService(
         product.apply {
             dto.name.takeIf { it.isSet }?.let { name = it.value }
             dto.brand.takeIf { it.isSet }?.let { brand = it.value }
-            dto.height.takeIf { it.isSet }?.let { height = it.value }
-            dto.width.takeIf { it.isSet }?.let { width = it.value }
-            dto.depth.takeIf { it.isSet }?.let { depth = it.value }
-            dto.weight.takeIf { it.isSet }?.let { weight = it.value }
+            dto.specifications.takeIf { it.isSet }?.let { specifications = it.value }
             dto.category.takeIf { it.isSet }?.let {
                 category = findCategoryById(it.value !!)
             }

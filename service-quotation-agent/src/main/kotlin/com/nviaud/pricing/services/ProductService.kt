@@ -2,7 +2,6 @@ package com.nviaud.pricing.services
 
 import com.nviaud.pricing.events.v1.ProductCreated
 import com.nviaud.pricing.events.v1.ProductUpdated
-import com.nviaud.pricing.repositories.ProductRepository
 import org.slf4j.LoggerFactory
 import org.springframework.ai.document.Document
 import org.springframework.ai.vectorstore.VectorStore
@@ -13,7 +12,6 @@ import java.util.function.Consumer
 @Service
 @Suppress("unused")
 class ProductService(
-    private val productRepository: ProductRepository,
     private val vectorStore: VectorStore
 ) {
 

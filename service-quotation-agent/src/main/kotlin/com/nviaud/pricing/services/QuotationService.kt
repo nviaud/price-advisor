@@ -23,7 +23,6 @@ import java.util.function.Consumer
 @Service
 class QuotationService(
     private val quotationParserService: QuotationParserService,
-    private val productService: ProductService,
     private val quotationRepository: QuotationRepository,
     private val streamBridge: StreamBridge,
 )  {

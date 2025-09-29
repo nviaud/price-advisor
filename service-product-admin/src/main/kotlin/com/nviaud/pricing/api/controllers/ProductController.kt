@@ -1,5 +1,6 @@
 package com.nviaud.pricing.api.controllers
 
+import com.nviaud.pricing.api.annotations.Public
 import com.nviaud.pricing.api.resources.ProductRequest
 import com.nviaud.pricing.api.resources.ProductResponse
 import com.nviaud.pricing.api.resources.PaginatedProductResponse
@@ -17,13 +18,12 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.PageRequest
 import org.springframework.web.bind.annotation.RequestParam
 import com.nviaud.pricing.api.assemblers.ProductResponseAssembler
+import com.nviaud.pricing.entities.Specifications
 import com.nviaud.pricing.services.ProductService
 import com.nviaud.pricing.services.dto.CreateProduct
 import com.nviaud.pricing.services.dto.UpdateProduct
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.PatchMapping
-import com.nviaud.pricing.api.annotations.PublicEndpoint
-import org.springframework.http.MediaType
 
 
 @RestController
@@ -34,7 +34,7 @@ class ProductController (
     private val productResponseAssembler: ProductResponseAssembler
 ) {
     // Get all products with pagination
-    @PublicEndpoint
+    @Public
     @GetMapping
     fun getAllProductsWithPagination(
         @RequestParam(defaultValue = "0") page: Int,
@@ -47,7 +47,7 @@ class ProductController (
     }
 
     // Get a product by ID
-    @PublicEndpoint
+    @Public
     @GetMapping("/{id}")
     fun getProductById(@PathVariable id: Long): ResponseEntity<ProductResponse> {
         val product = productService.findById(id)
@@ -60,11 +60,13 @@ class ProductController (
         val productDto = CreateProduct(
             name = productRequest.name,
             brand = productRequest.brand,
-            height = productRequest.height,
-            width = productRequest.width,
-            depth = productRequest.depth,
-            weight = productRequest.weight,
-            category = productRequest.category
+            category = productRequest.category,
+            specifications = Specifications(
+                height = productRequest.height,
+                width = productRequest.width,
+                depth = productRequest.depth,
+                weight = productRequest.weight
+            )
         )
         val product = productService.create(productDto)
         return ResponseEntity.status(HttpStatus.CREATED).body(productResponseAssembler.toResponse(product))
@@ -76,11 +78,13 @@ class ProductController (
             id = id,
             name = productRequest.name,
             brand = productRequest.brand,
-            height = productRequest.height,
-            width = productRequest.width,
-            depth = productRequest.depth,
-            weight = productRequest.weight,
-            category = productRequest.category
+            category = productRequest.category,
+            specifications = Specifications(
+                height = productRequest.height,
+                width = productRequest.width,
+                depth = productRequest.depth,
+                weight = productRequest.weight
+            )
         )
         val product = productService.update(productDto)
         return ResponseEntity.ok(productResponseAssembler.toResponse(product))

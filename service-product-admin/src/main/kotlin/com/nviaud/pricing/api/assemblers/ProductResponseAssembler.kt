@@ -18,10 +18,10 @@ class ProductResponseAssembler(
         id = t.id!!,
         name = t.name,
         brand = t.brand,
-        height = t.height,
-        width = t.width,
-        depth = t.depth,
-        weight = t.weight,
+        height = t.specifications?.height,
+        width = t.specifications?.width,
+        depth = t.specifications?.depth,
+        weight = t.specifications?.weight,
         category = t.category?.let { categoryResponseAssembler.toResponse(it) }
     )
 

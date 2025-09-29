@@ -1,5 +1,6 @@
 package com.nviaud.pricing.api.controllers
 
+import com.nviaud.pricing.api.annotations.Public
 import org.springframework.http.ResponseEntity
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -15,7 +16,6 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.web.bind.annotation.RequestParam
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.PatchMapping
-import com.nviaud.pricing.api.annotations.PublicEndpoint
 import com.nviaud.pricing.api.assemblers.CategoryResponseAssembler
 import com.nviaud.pricing.api.resources.CategoryRequest
 import com.nviaud.pricing.api.resources.CategoryResponse
@@ -23,7 +23,6 @@ import com.nviaud.pricing.api.resources.PaginatedCategoryResponse
 import com.nviaud.pricing.services.CategoryService
 import com.nviaud.pricing.services.dto.CreateCategory
 import com.nviaud.pricing.services.dto.UpdateCategory
-import org.springframework.http.MediaType
 
 
 @RestController
@@ -35,7 +34,7 @@ class CategoryController (
 ) {
 
     // Get all categories with pagination
-    @PublicEndpoint
+    @Public
     @GetMapping
     fun getAllCategoryWithPagination(
         @RequestParam(defaultValue = "0") page: Int,
@@ -48,7 +47,7 @@ class CategoryController (
     }
 
     // Get a category by ID
-    @PublicEndpoint
+    @Public
     @GetMapping("/{id}")
     fun getCategoryById(@PathVariable id: Long): ResponseEntity<CategoryResponse> {
         val category = categoryService.findById(id)

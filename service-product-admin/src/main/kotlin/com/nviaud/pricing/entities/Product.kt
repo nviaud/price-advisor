@@ -10,12 +10,14 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import jakarta.persistence.Version
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 
 @Entity
 @Table(
     uniqueConstraints = [
         UniqueConstraint(
-            columnNames = ["name", "brand", "height", "width", "depth", "weight"]
+            columnNames = ["name", "brand", "specifications"]
         )
     ]
 )
@@ -35,10 +37,14 @@ class Product {
     @ManyToOne(optional = false)
     var category: Category? = null
 
-    var height: Int? = null
-    var width: Int? = null
-    var depth: Int? = null
-    var weight: Int? = null
+    /**
+     * Store semi structured product specifications as JSON.
+     * Example: {"color": "red", "material": "plastic"}
+     * An alternative would be to use a document database like MongoDB.
+     */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "json")
+    var specifications: Specifications? = null
 
     @Version
     @JsonIgnore
