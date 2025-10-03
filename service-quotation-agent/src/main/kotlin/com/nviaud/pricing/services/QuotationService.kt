@@ -4,6 +4,7 @@ import com.nviaud.pricing.entities.Quotation
 import com.nviaud.pricing.entities.QuotationStatus
 import com.nviaud.pricing.events.Events
 import com.nviaud.pricing.events.v1.QuotationSubmitted
+import com.nviaud.pricing.events.v1.QuotationUpdated
 import com.nviaud.pricing.repositories.QuotationRepository
 import com.nviaud.pricing.services.parsers.QuotationParserService
 import org.slf4j.LoggerFactory
@@ -28,6 +29,12 @@ class QuotationService(
 )  {
 
     private val logger = LoggerFactory.getLogger(QuotationService::class.java)
+
+    fun findById(id: Long) = quotationRepository.findById(id).orElseThrow {
+        NoSuchElementException("Quotation with id $id not found")
+    }
+
+    fun getQuotation(id: Long) = findById(id)
 
     fun submitQuotation(
         principal: Principal?,
@@ -67,18 +74,18 @@ class QuotationService(
     @Bean
     fun onQuotationSubmitted(): Consumer<QuotationSubmitted> = Consumer { message ->
         logger.info("Received QuotationSubmittedMessage: $message")
-        val quotation = quotationRepository.findById(message.quotationId.toLong()).orElseThrow {
-            NoSuchElementException("Quotation with id ${message.quotationId} not found")
-        }
 
+        val quotation = findById(message.quotationId.toLong())
         val mimeType = MimeTypeUtils.parseMimeType(quotation.resourceMimeType!!)
         val resource = ByteArrayResource(quotation.resourceData!!)
         val quotationData = quotationParserService.parseDataFromQuotation(mimeType, resource)
         quotation.status = QuotationStatus.WAITING_VALIDATION
         quotation.data = quotationData
-        quotationRepository.save(quotation)
+        val savedQuotation = quotationRepository.save(quotation)
         logger.info("Quotation " + quotation.id + " updated with parsed data.")
 
+        // Publish status update event
+        publishQuotationUpdated(savedQuotation)
     }
 
     @Bean
@@ -91,9 +98,54 @@ class QuotationService(
                     NoSuchElementException("Quotation with id ${message.quotationId} not found")
                 }
                 quotation.status = QuotationStatus.ERROR
-                quotationRepository.save(quotation)
+                val savedQuotation = quotationRepository.save(quotation)
+
+                // Publish error status update event
+                publishQuotationUpdated(savedQuotation)
             }
         }
     }
 
+    fun validateQuotation(quotationId: Long, date: ZonedDateTime): Quotation {
+        val quotation = findById(quotationId)
+        if(quotation.status != QuotationStatus.WAITING_VALIDATION){
+            throw IllegalStateException("Can't validate a quotation with status ${quotation.status}")
+        }
+        quotation.status = QuotationStatus.VALIDATED
+        quotation.validationDate = date
+        val savedQuotation = quotationRepository.save(quotation)
+
+        // Publish status update event
+        publishQuotationUpdated(savedQuotation)
+        return savedQuotation
+    }
+
+    fun rejectQuotation(quotationId: Long, date: ZonedDateTime): Quotation {
+        val quotation = findById(quotationId)
+        if(quotation.status != QuotationStatus.WAITING_VALIDATION){
+            throw IllegalStateException("Can't reject a quotation with status ${quotation.status}")
+        }
+        quotation.status = QuotationStatus.REJECTED
+        quotation.validationDate = date
+        val savedQuotation = quotationRepository.save(quotation)
+
+        // Publish status update event
+        publishQuotationUpdated(savedQuotation)
+        return savedQuotation
+    }
+
+    private fun publishQuotationUpdated(quotation: Quotation) {
+        val message = QuotationUpdated(
+            quotationId = quotation.id!!.toString(),
+            status = quotation.status!!.name,
+            userId = quotation.userId!!
+        )
+        val sent = streamBridge.send(Events.QUOTATION_UPDATED_V1, message)
+        if (!sent) {
+            logger.error("Failed to send quotation updated message for quotationId: {}", quotation.id)
+        } else {
+            logger.debug("Published QuotationUpdated event for quotationId: {}, status: {}", quotation.id, quotation.status)
+        }
+    }
 }
+

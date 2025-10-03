@@ -37,6 +37,8 @@ class Quotation {
     var status: QuotationStatus? = null
 
     var submissionDate: ZonedDateTime? = null
+    var validationDate: ZonedDateTime? = null
+    var rejectionDate: ZonedDateTime? = null
 
     @Lob
     @Basic(fetch= FetchType.LAZY)

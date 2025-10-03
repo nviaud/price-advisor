@@ -34,4 +34,11 @@ object Events {
      * Version: v1
      */
     const val PRODUCT_UPDATED_V1 = "pricing-product-updated.v1"
+
+    /**
+     * Published when a quotation status is updated.
+     * Payload: QuotationUpdated
+     * Version: v1
+     */
+    const val QUOTATION_UPDATED_V1 = "pricing-quotation-updated.v1"
 }
