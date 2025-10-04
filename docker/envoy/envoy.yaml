@@ -59,15 +59,6 @@ static_resources:
                       domains: [ "*" ]
                       routes:
                         - match:
-                            prefix: "/"
-                          route:
-                            cluster: service_frontend
-                            timeout: 5s
-                          typed_per_filter_config:
-                            envoy.filters.http.oauth2:
-                              "@type": type.googleapis.com/envoy.extensions.filters.http.oauth2.v3.OAuth2PerRoute
-                              disabled: true
-                        - match:
                             prefix: "/api/products/"
                           route:
                             cluster: service_product_admin
@@ -87,6 +78,15 @@ static_resources:
                           route:
                             cluster: service_quotation_agent
                             timeout: 5s
+                        - match:
+                            prefix: "/"
+                          route:
+                            cluster: service_frontend
+                            timeout: 5s
+                          typed_per_filter_config:
+                            envoy.filters.http.oauth2:
+                              "@type": type.googleapis.com/envoy.extensions.filters.http.oauth2.v3.OAuth2Config
+                              disabled: true
   clusters:
     - name: keycloak
       type: LOGICAL_DNS
