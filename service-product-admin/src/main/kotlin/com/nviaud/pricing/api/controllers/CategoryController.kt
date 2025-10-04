@@ -26,7 +26,7 @@ import com.nviaud.pricing.services.dto.UpdateCategory
 
 
 @RestController
-@RequestMapping("/v1/categories")
+@RequestMapping("/categories", version = "v1")
 @Suppress("unused")
 class CategoryController (
     private val categoryService: CategoryService,

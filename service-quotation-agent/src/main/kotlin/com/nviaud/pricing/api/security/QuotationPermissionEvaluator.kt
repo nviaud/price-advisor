@@ -47,8 +47,8 @@ class QuotationPermissionEvaluator(
 
     override fun hasPermission(
         authentication: Authentication,
-        targetDomainObject: Any?,
-        permission: Any?
+        targetDomainObject: Any,
+        permission: Any
     ): Boolean {
         // Not used in this implementation
         return false

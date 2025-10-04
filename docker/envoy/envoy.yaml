@@ -65,19 +65,25 @@ static_resources:
                             timeout: 5s
                           typed_per_filter_config:
                             envoy.filters.http.oauth2:
+                              "@type": type.googleapis.com/envoy.extensions.filters.http.oauth2.v3.OAuth2PerRoute
                               disabled: true
                         - match:
-                            prefix: "/api/v1/products/"
+                            prefix: "/api/products/"
                           route:
                             cluster: service_product_admin
                             timeout: 5s
                         - match:
-                            prefix: "/api/v1/products-analytics/"
+                            prefix: "/api/categories/"
+                          route:
+                            cluster: service_product_admin
+                            timeout: 5s
+                        - match:
+                            prefix: "/api/products-analytics/"
                           route:
                             cluster: service_product_analytics
                             timeout: 5s
                         - match:
-                            prefix: "/api/v1/quotations/"
+                            prefix: "/api/quotations/"
                           route:
                             cluster: service_quotation_agent
                             timeout: 5s

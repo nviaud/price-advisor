@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.PatchMapping
 
 
 @RestController
-@RequestMapping("/v1/products")
+@RequestMapping("/products", version = "v1")
 @Suppress("unused")
 class ProductController (
     private val productService: ProductService,

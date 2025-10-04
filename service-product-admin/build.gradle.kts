@@ -1,9 +1,9 @@
 plugins {
-    kotlin("jvm") version "1.9.25"
-    kotlin("plugin.spring") version "1.9.25"
-    id("org.springframework.boot") version "3.5.5"
+    kotlin("jvm") version "2.2.20"
+    kotlin("plugin.spring") version "2.2.20"
+    id("org.springframework.boot") version "4.0.0-M3"
     id("io.spring.dependency-management") version "1.1.7"
-    kotlin("plugin.jpa") version "1.9.25"
+    kotlin("plugin.jpa") version "2.2.20"
 }
 
 group = "com.nviaud"
@@ -15,11 +15,13 @@ java {
     }
 }
 
-repositories {
-    mavenCentral()
-}
 
 extra["springCloudVersion"] = "2025.0.0"
+
+repositories {
+    mavenCentral()
+    maven { url = uri("https://repo.spring.io/milestone") }
+}
 
 dependencies {
     implementation (project(":lib-events"))

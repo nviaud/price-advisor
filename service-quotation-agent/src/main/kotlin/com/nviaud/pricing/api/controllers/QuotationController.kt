@@ -20,7 +20,7 @@ import java.time.ZonedDateTime
 
 
 @RestController
-@RequestMapping("/quotations")
+@RequestMapping("/quotations", version = "v1")
 @Suppress("unused")
 class QuotationController (
     private val quotationService: QuotationService,
