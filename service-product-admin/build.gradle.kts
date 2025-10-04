@@ -34,6 +34,18 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-stream")
     implementation("org.springframework.amqp:spring-rabbit-stream")
     implementation("org.springframework.cloud:spring-cloud-stream-binder-rabbit")
+
+    // CloudEvents support
+    implementation("io.cloudevents:cloudevents-core:3.0.0")
+    implementation("io.cloudevents:cloudevents-json-jackson:3.0.0")
+    implementation("io.cloudevents:cloudevents-spring:3.0.0")
+
+    // OpenTelemetry for distributed tracing
+    implementation("io.opentelemetry:opentelemetry-api:1.43.0")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:2.10.0")
+    implementation("io.micrometer:micrometer-tracing-bridge-otel")
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp:1.43.0")
+
 //    implementation("org.springframework.boot:spring-boot-starter-data-rest")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

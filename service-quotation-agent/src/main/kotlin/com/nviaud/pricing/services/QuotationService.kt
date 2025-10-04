@@ -2,18 +2,20 @@ package com.nviaud.pricing.services
 
 import com.nviaud.pricing.entities.Quotation
 import com.nviaud.pricing.entities.QuotationStatus
+import com.nviaud.pricing.events.EventPublisher
 import com.nviaud.pricing.events.Events
 import com.nviaud.pricing.events.v1.QuotationSubmitted
 import com.nviaud.pricing.events.v1.QuotationUpdated
+import com.nviaud.pricing.idempotency.IdempotencyService
 import com.nviaud.pricing.repositories.QuotationRepository
 import com.nviaud.pricing.services.parsers.QuotationParserService
 import org.slf4j.LoggerFactory
-import org.springframework.cloud.stream.function.StreamBridge
 import org.springframework.context.annotation.Bean
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.Resource
 import org.springframework.messaging.support.ErrorMessage
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.MimeType
 import org.springframework.util.MimeTypeUtils
 import java.security.Principal
@@ -25,7 +27,7 @@ import java.util.function.Consumer
 class QuotationService(
     private val quotationParserService: QuotationParserService,
     private val quotationRepository: QuotationRepository,
-    private val streamBridge: StreamBridge,
+    private val eventPublisher: EventPublisher,
 )  {
 
     private val logger = LoggerFactory.getLogger(QuotationService::class.java)
@@ -36,6 +38,7 @@ class QuotationService(
 
     fun getQuotation(id: Long) = findById(id)
 
+    @Transactional
     fun submitQuotation(
         principal: Principal?,
         mimeType: MimeType,
@@ -59,14 +62,17 @@ class QuotationService(
         }
 
         val savedQuotation = quotationRepository.save(quotation)
-        val message = QuotationSubmitted(
-            quotationId = savedQuotation.id!!.toString(),
+
+        // Publish event (uses Outbox pattern internally)
+        eventPublisher.publish(
+            eventType = Events.QUOTATION_SUBMITTED_V1,
+            data = QuotationSubmitted(quotationId = savedQuotation.id!!.toString()),
+            aggregateType = "Quotation",
+            aggregateId = savedQuotation.id!!.toString()
         )
-        val sent = streamBridge.send(Events.QUOTATION_SUBMITTED_V1, message)
-        if (!sent) {
-            logger.error("Failed to send quotation submitted message for quotationId: {}", savedQuotation.id)
-            throw RuntimeException("Failed to send message")
-        }
+
+        logger.info("Quotation submitted: id={}, userId={}", savedQuotation.id, savedQuotation.userId)
+
         return savedQuotation
     }
 
@@ -135,17 +141,17 @@ class QuotationService(
     }
 
     private fun publishQuotationUpdated(quotation: Quotation) {
-        val message = QuotationUpdated(
-            quotationId = quotation.id!!.toString(),
-            status = quotation.status!!.name,
-            userId = quotation.userId!!
+        eventPublisher.publish(
+            eventType = Events.QUOTATION_UPDATED_V1,
+            data = QuotationUpdated(
+                quotationId = quotation.id!!.toString(),
+                status = quotation.status!!.name,
+                userId = quotation.userId!!
+            ),
+            aggregateType = "Quotation",
+            aggregateId = quotation.id!!.toString()
         )
-        val sent = streamBridge.send(Events.QUOTATION_UPDATED_V1, message)
-        if (!sent) {
-            logger.error("Failed to send quotation updated message for quotationId: {}", quotation.id)
-        } else {
-            logger.debug("Published QuotationUpdated event for quotationId: {}, status: {}", quotation.id, quotation.status)
-        }
+        logger.debug("QuotationUpdated event queued: quotationId={}, status={}", quotation.id, quotation.status)
     }
 }
 

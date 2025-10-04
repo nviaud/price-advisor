@@ -18,7 +18,9 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
     implementation("io.cloudevents:cloudevents-core:3.0.0")
+    implementation("io.cloudevents:cloudevents-json-jackson:3.0.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
 }
 
 tasks.test {
