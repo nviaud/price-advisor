@@ -44,7 +44,7 @@ class QuotationParserAiService(
 ) : QuotationParserService {
 
 
-    private val logger = LoggerFactory.getLogger(QuotationParserAiService::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     private val beanOutputConverter = BeanOutputConverter(QuotationData::class.java)
 

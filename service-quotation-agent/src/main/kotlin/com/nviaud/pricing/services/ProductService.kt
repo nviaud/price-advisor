@@ -15,7 +15,7 @@ class ProductService(
     private val vectorStore: VectorStore
 ) {
 
-    private val logger = LoggerFactory.getLogger(QuotationService::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @Bean
     fun onProductCreated(): Consumer<ProductCreated> {

@@ -59,6 +59,11 @@ dependencies {
         exclude(group = "org.slf4j", module = "slf4j-simple")
     }
     implementation("net.sourceforge.tess4j:tess4j:5.11.0")
+
+    // ShedLock for distributed scheduled task locking
+    implementation("net.javacrumbs.shedlock:shedlock-spring:6.10.0")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.10.0")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

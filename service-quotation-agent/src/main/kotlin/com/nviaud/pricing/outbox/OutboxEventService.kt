@@ -19,7 +19,7 @@ class OutboxEventService(
     private val objectMapper: ObjectMapper
 ) {
 
-    private val logger = LoggerFactory.getLogger(OutboxEventService::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     /**
      * Stores a CloudEvent in the outbox within the current transaction.

@@ -1,8 +1,7 @@
 package com.nviaud.pricing.services
 
 import com.nviaud.pricing.entities.Product
-import com.nviaud.pricing.entities.Specifications
-import com.nviaud.pricing.events.Events
+import com.nviaud.pricing.events.Topics
 import com.nviaud.pricing.events.v1.ProductCreated
 import com.nviaud.pricing.events.v1.ProductUpdated
 import com.nviaud.pricing.services.exceptions.ProductNotFoundException
@@ -96,7 +95,7 @@ class ProductService(
             category = product.category!!.name!!
         )
         logger.info("Sending ProductCreated event: $event")
-        streamBridge.send(Events.PRODUCT_CREATED_V1, event)
+        streamBridge.send(Topics.PRODUCT_CREATED_V1, event)
     }
 
 //    @HandleAfterSave
@@ -108,7 +107,7 @@ class ProductService(
             category = product.category!!.name!!
         )
         logger.info("Sending ProductUpdated event: $event")
-        streamBridge.send(Events.PRODUCT_UPDATED_V1, event)
+        streamBridge.send(Topics.PRODUCT_UPDATED_V1, event)
     }
 
 

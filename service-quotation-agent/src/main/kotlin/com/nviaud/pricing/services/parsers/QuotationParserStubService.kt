@@ -12,7 +12,7 @@ import java.math.BigDecimal
 @ConditionalOnProperty(name = ["application.services.quotation-parser.stub.enabled"], havingValue = "true")
 class QuotationParserStubService : QuotationParserService {
 
-    private val logger = LoggerFactory.getLogger(QuotationParserStubService::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun parseDataFromQuotation(
         mimeType: MimeType,

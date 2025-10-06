@@ -3,10 +3,8 @@ package com.nviaud.pricing.services
 import com.nviaud.pricing.entities.Quotation
 import com.nviaud.pricing.entities.QuotationStatus
 import com.nviaud.pricing.events.EventPublisher
-import com.nviaud.pricing.events.Events
-import com.nviaud.pricing.events.v1.QuotationSubmitted
-import com.nviaud.pricing.events.v1.QuotationUpdated
-import com.nviaud.pricing.idempotency.IdempotencyService
+import com.nviaud.pricing.events.Topics
+import com.nviaud.pricing.events.v1.*
 import com.nviaud.pricing.repositories.QuotationRepository
 import com.nviaud.pricing.services.parsers.QuotationParserService
 import org.slf4j.LoggerFactory
@@ -30,7 +28,7 @@ class QuotationService(
     private val eventPublisher: EventPublisher,
 )  {
 
-    private val logger = LoggerFactory.getLogger(QuotationService::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun findById(id: Long) = quotationRepository.findById(id).orElseThrow {
         NoSuchElementException("Quotation with id $id not found")
@@ -65,7 +63,7 @@ class QuotationService(
 
         // Publish event (uses Outbox pattern internally)
         eventPublisher.publish(
-            eventType = Events.QUOTATION_SUBMITTED_V1,
+            eventType = Topics.QUOTATION_SUBMITTED_V1,
             data = QuotationSubmitted(quotationId = savedQuotation.id!!.toString()),
             aggregateType = "Quotation",
             aggregateId = savedQuotation.id!!.toString()
@@ -90,8 +88,8 @@ class QuotationService(
         val savedQuotation = quotationRepository.save(quotation)
         logger.info("Quotation " + quotation.id + " updated with parsed data.")
 
-        // Publish status update event
-        publishQuotationUpdated(savedQuotation)
+        // Publish parsing completed event
+        publishQuotationParsingCompleted(savedQuotation)
     }
 
     @Bean
@@ -106,8 +104,8 @@ class QuotationService(
                 quotation.status = QuotationStatus.ERROR
                 val savedQuotation = quotationRepository.save(quotation)
 
-                // Publish error status update event
-                publishQuotationUpdated(savedQuotation)
+                // Publish parsing failed event
+                publishQuotationParsingFailed(savedQuotation, error.payload.message)
             }
         }
     }
@@ -121,8 +119,8 @@ class QuotationService(
         quotation.validationDate = date
         val savedQuotation = quotationRepository.save(quotation)
 
-        // Publish status update event
-        publishQuotationUpdated(savedQuotation)
+        // Publish validation event
+        publishQuotationValidated(savedQuotation)
         return savedQuotation
     }
 
@@ -135,23 +133,93 @@ class QuotationService(
         quotation.validationDate = date
         val savedQuotation = quotationRepository.save(quotation)
 
-        // Publish status update event
-        publishQuotationUpdated(savedQuotation)
+        // Publish rejection event
+        publishQuotationRejected(savedQuotation)
         return savedQuotation
     }
 
-    private fun publishQuotationUpdated(quotation: Quotation) {
+    private fun publishQuotationParsingCompleted(quotation: Quotation) {
+        val eventProducts = mapQuotationProducts(quotation)
+
         eventPublisher.publish(
-            eventType = Events.QUOTATION_UPDATED_V1,
-            data = QuotationUpdated(
+            eventType = Topics.QUOTATION_PARSING_COMPLETED_V1,
+            data = QuotationParsingCompleted(
                 quotationId = quotation.id!!.toString(),
-                status = quotation.status!!.name,
-                userId = quotation.userId!!
+                userId = quotation.userId!!,
+                products = eventProducts,
+                quotationDate = quotation.data?.quotationDate
             ),
             aggregateType = "Quotation",
             aggregateId = quotation.id!!.toString()
         )
-        logger.debug("QuotationUpdated event queued: quotationId={}, status={}", quotation.id, quotation.status)
+        logger.debug("QuotationParsingCompleted event queued: quotationId={}, productsCount={}",
+            quotation.id, eventProducts.size)
+    }
+
+    private fun publishQuotationParsingFailed(quotation: Quotation, errorMessage: String?) {
+        eventPublisher.publish(
+            eventType = Topics.QUOTATION_PARSING_FAILED_V1,
+            data = QuotationParsingFailed(
+                quotationId = quotation.id!!.toString(),
+                userId = quotation.userId!!,
+                errorMessage = errorMessage
+            ),
+            aggregateType = "Quotation",
+            aggregateId = quotation.id!!.toString()
+        )
+        logger.debug("QuotationParsingFailed event queued: quotationId={}", quotation.id)
+    }
+
+    private fun publishQuotationValidated(quotation: Quotation) {
+        val eventProducts = mapQuotationProducts(quotation)
+
+        eventPublisher.publish(
+            eventType = Topics.QUOTATION_VALIDATED_V1,
+            data = QuotationValidated(
+                quotationId = quotation.id!!.toString(),
+                userId = quotation.userId!!,
+                validationDate = quotation.validationDate!!.toString(),
+                products = eventProducts,
+                quotationDate = quotation.data?.quotationDate
+            ),
+            aggregateType = "Quotation",
+            aggregateId = quotation.id!!.toString()
+        )
+        logger.debug("QuotationValidated event queued: quotationId={}, productsCount={}",
+            quotation.id, eventProducts.size)
+    }
+
+    private fun publishQuotationRejected(quotation: Quotation) {
+        eventPublisher.publish(
+            eventType = Topics.QUOTATION_REJECTED_V1,
+            data = QuotationRejected(
+                quotationId = quotation.id!!.toString(),
+                userId = quotation.userId!!,
+                rejectionDate = quotation.validationDate!!.toString(),
+                reason = null  // Can be extended to include rejection reason
+            ),
+            aggregateType = "Quotation",
+            aggregateId = quotation.id!!.toString()
+        )
+        logger.debug("QuotationRejected event queued: quotationId={}", quotation.id)
+    }
+
+    private fun mapQuotationProducts(quotation: Quotation): List<QuotationProduct> {
+        return quotation.data?.products?.map { product ->
+            QuotationProduct(
+                productBrand = product.productBrand,
+                productName = product.productName,
+                productCategory = product.productCategory,
+                productHeight = product.productHeight,
+                productWidth = product.productWidth,
+                productDepth = product.productDepth,
+                productWeight = product.productWeight,
+                quantity = product.quantity,
+                unitPrice = product.unitPrice,
+                totalPrice = product.totalPrice,
+                vat = product.vat
+            )
+        } ?: emptyList()
     }
 }
 

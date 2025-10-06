@@ -16,7 +16,7 @@ class IdempotencyService(
     private val processedEventRepository: ProcessedEventRepository
 ) {
 
-    private val logger = LoggerFactory.getLogger(IdempotencyService::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     /**
      * Checks if an event has already been processed.

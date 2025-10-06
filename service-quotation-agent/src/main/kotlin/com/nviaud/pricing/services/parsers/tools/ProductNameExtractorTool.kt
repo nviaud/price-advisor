@@ -21,7 +21,7 @@ class ProductNameExtractorTool(
     private val chatClient: ChatClient,
 ) {
 
-    private val logger = LoggerFactory.getLogger(ProductNameExtractorTool::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     companion object {
         const val PRODUCT_NAME_EXTRACTOR_TOOL: String = "tool-productNameExtractor"

@@ -1,7 +1,8 @@
 package com.nviaud.pricing.services
 
 import com.nviaud.pricing.entities.Quotation
-import com.nviaud.pricing.events.v1.QuotationUpdated
+import com.nviaud.pricing.entities.QuotationStatus
+import com.nviaud.pricing.events.v1.*
 import com.nviaud.pricing.repositories.QuotationRepository
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -13,26 +14,55 @@ import java.util.function.Consumer
 
 /**
  * Service to handle streaming quotation updates via SSE.
- * Listens to QuotationUpdated events and broadcasts them to subscribed clients.
+ * Listens to quotation lifecycle events and broadcasts them to subscribed clients.
  */
 @Service
 class QuotationStreamService(
     private val quotationRepository: QuotationRepository
 ) {
 
-    private val logger = LoggerFactory.getLogger(QuotationStreamService::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     // Map of quotationId to Sinks for broadcasting updates
     private val quotationSinks = ConcurrentHashMap<Long, Sinks.Many<Quotation>>()
 
     /**
-     * Listen to QuotationUpdated events from the message broker.
+     * Listen to QuotationParsingCompleted events from the message broker.
      */
     @Bean
-    fun onQuotationUpdated(): Consumer<QuotationUpdated> = Consumer { event ->
-        logger.info("Received QuotationUpdated event: $event")
+    fun onQuotationParsingCompletedStream(): Consumer<QuotationParsingCompleted> = Consumer { event ->
+        logger.info("Received QuotationParsingCompleted event for streaming: $event")
+        emitQuotationUpdate(event.quotationId.toLong())
+    }
 
-        val quotationId = event.quotationId.toLong()
+    /**
+     * Listen to QuotationValidated events from the message broker.
+     */
+    @Bean
+    fun onQuotationValidatedStream(): Consumer<QuotationValidated> = Consumer { event ->
+        logger.info("Received QuotationValidated event for streaming: $event")
+        emitQuotationUpdate(event.quotationId.toLong())
+    }
+
+    /**
+     * Listen to QuotationRejected events from the message broker.
+     */
+    @Bean
+    fun onQuotationRejectedStream(): Consumer<QuotationRejected> = Consumer { event ->
+        logger.info("Received QuotationRejected event for streaming: $event")
+        emitQuotationUpdate(event.quotationId.toLong())
+    }
+
+    /**
+     * Listen to QuotationParsingFailed events from the message broker.
+     */
+    @Bean
+    fun onQuotationParsingFailedStream(): Consumer<QuotationParsingFailed> = Consumer { event ->
+        logger.info("Received QuotationParsingFailed event for streaming: $event")
+        emitQuotationUpdate(event.quotationId.toLong())
+    }
+
+    private fun emitQuotationUpdate(quotationId: Long) {
         val sink = quotationSinks[quotationId]
 
         if (sink != null) {
@@ -44,9 +74,9 @@ class QuotationStreamService(
 
                 // Complete the stream if quotation reached a terminal state
                 if (quotation.status in listOf(
-                        com.nviaud.pricing.entities.QuotationStatus.VALIDATED,
-                        com.nviaud.pricing.entities.QuotationStatus.REJECTED,
-                        com.nviaud.pricing.entities.QuotationStatus.ERROR
+                        QuotationStatus.VALIDATED,
+                        QuotationStatus.REJECTED,
+                        QuotationStatus.ERROR
                     )
                 ) {
                     sink.tryEmitComplete()

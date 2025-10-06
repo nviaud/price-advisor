@@ -78,4 +78,7 @@ class QuotationController (
         return quotationService.rejectQuotation(id, now)
     }
 
+    @GetMapping("/{id}/data")
+    fun getQuotationData(@PathVariable id: Long) = quotationService.getQuotation(id).data
+
 }

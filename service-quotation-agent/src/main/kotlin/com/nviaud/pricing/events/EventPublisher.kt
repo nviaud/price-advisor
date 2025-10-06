@@ -27,7 +27,7 @@ class EventPublisher(
     @Value("\${spring.application.name}") private val serviceName: String
 ) {
 
-    private val logger = LoggerFactory.getLogger(EventPublisher::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     /**
      * Publishes an event using the Transactional Outbox pattern.

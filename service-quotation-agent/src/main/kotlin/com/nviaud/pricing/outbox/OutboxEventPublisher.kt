@@ -3,8 +3,12 @@ package com.nviaud.pricing.outbox
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.cloudevents.CloudEvent
 import io.cloudevents.jackson.JsonFormat
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import org.slf4j.LoggerFactory
+import org.springframework.amqp.support.AmqpHeaders
 import org.springframework.cloud.stream.function.StreamBridge
+import org.springframework.integration.support.MessageBuilder
+import org.springframework.messaging.MessageHeaders
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -21,7 +25,7 @@ class OutboxEventPublisher(
     private val streamBridge: StreamBridge,
 ) {
 
-    private val logger = LoggerFactory.getLogger(OutboxEventPublisher::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     /**
      * Publishes unpublished events from the outbox.
@@ -43,8 +47,12 @@ class OutboxEventPublisher(
                 // Deserialize CloudEvent from JSON
                 val cloudEvent = JsonFormat().deserialize(event.payload.toByteArray())
 
-                // Send to message broker
-                val sent = streamBridge.send(event.eventType, cloudEvent)
+                // Send to message broker (event type is the destination)
+                val message = MessageBuilder
+                    .withPayload(cloudEvent)
+                    .build()
+
+                val sent = streamBridge.send(event.eventType, message)
 
                 if (sent) {
                     event.published = true
@@ -86,8 +94,19 @@ class OutboxEventPublisher(
     /**
      * Cleans up old published events.
      * Runs every hour, keeps events for 7 days.
+     *
+     * Uses ShedLock to ensure only ONE instance executes this cleanup
+     * across multiple service instances in production.
+     *
+     * - lockAtMostFor: Maximum lock duration (50 minutes) - if instance crashes, lock expires
+     * - lockAtLeastFor: Minimum lock duration (10 minutes) - prevents too frequent execution
      */
     @Scheduled(fixedDelay = 3600000) // 1 hour
+    @SchedulerLock(
+        name = "OutboxEventPublisher_cleanupOldEvents",
+        lockAtMostFor = "50m",
+        lockAtLeastFor = "10m"
+    )
     @Transactional
     fun cleanupOldEvents() {
         val retentionDays = 7L
@@ -98,4 +117,5 @@ class OutboxEventPublisher(
             logger.info("Cleaned up {} published events older than {} days", deleted, retentionDays)
         }
     }
+
 }
